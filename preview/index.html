@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ET Portfolio — Design preview v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --font-sans: "DM Sans", system-ui, sans-serif;
+      --font-serif: "Source Serif 4", Georgia, serif;
+      --font-mono: "IBM Plex Mono", monospace;
+      --chrome-h: 88px;
+      --transition-theme: background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+    }
+
+    html[data-theme="light"] {
+      --ink: #0a0a0a;
+      --ink-soft: #161616;
+      --paper: #f4f2ee;
+      --paper-cool: #e8e6e1;
+      --white: #fafafa;
+      --card-bg: #ffffff;
+      --text-body: #333333;
+      --accent: #3d6b8c;
+      --accent-soft: rgba(61, 107, 140, 0.14);
+      --accent-chart: #7eb8d4;
+      --muted: #646464;
+      --line: rgba(10, 10, 10, 0.08);
+      --shell-bg: #0c0c0c;
+      --nav-bar-bg: rgba(250, 250, 250, 0.88);
+      --hero-bg: #0a0a0a;
+      --contact-bg: #0a0a0a;
+      --filter-pill-bg: #ffffff;
+      --gutter-chart-bg: rgba(255, 255, 255, 0.88);
+      --cursor-dot: #0a0a0a;
+      --cursor-ring: rgba(10, 10, 10, 0.4);
+    }
+
+    html[data-theme="dark"] {
+      --ink: #ececea;
+      --ink-soft: #050508;
+      --paper: #101014;
+      --paper-cool: #18181e;
+      --white: #1c1c22;
+      --card-bg: #1c1c22;
+      --text-body: #b8b8b4;
+      --accent: #7eb8d4;
+      --accent-soft: rgba(126, 184, 212, 0.16);
+      --accent-chart: #9ccfe8;
+      --muted: #8a8f94;
+      --line: rgba(255, 255, 255, 0.09);
+      --shell-bg: #050508;
+      --nav-bar-bg: rgba(16, 16, 20, 0.92);
+      --hero-bg: #050508;
+      --contact-bg: #050508;
+      --filter-pill-bg: #1c1c22;
+      --gutter-chart-bg: rgba(28, 28, 34, 0.92);
+      --cursor-dot: #ececea;
+      --cursor-ring: rgba(255, 255, 255, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { color-scheme: light dark; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--shell-bg);
+      color: var(--ink);
+      transition: var(--transition-theme);
+    }
+
+    .artboard,
+    .panel,
+    .case-card,
+    .featured-main,
+    .post-card,
+    .side-panel,
+    .filter-pill,
+    .gutter-chart,
+    .nav-fixed {
+      transition: var(--transition-theme);
+    }
+
+    body.preview-active { cursor: none; }
+
+    .cursor-dot, .cursor-ring {
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .cursor-dot { width: 6px; height: 6px; background: var(--cursor-dot); border-radius: 50%; }
+    .cursor-ring { width: 36px; height: 36px; border: 1px solid var(--cursor-ring); border-radius: 50%; }
+    body.on-hero .cursor-dot { background: #fff; }
+    body.on-hero .cursor-ring { border-color: rgba(255,255,255,0.55); }
+    body.cursor-hover .cursor-ring { width: 52px; height: 52px; }
+    body.on-hero.cursor-hover .cursor-ring { border-color: rgba(255,255,255,0.8); }
+
+    .preview-chrome {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1001;
+      display: flex; align-items: center; gap: 6px 8px; padding: 8px 14px;
+      background: rgba(12,12,12,0.92); backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap;
+    }
+    .preview-chrome * { cursor: default !important; }
+    .preview-chrome > span:first-child { color: #888; font-size: 11px; font-family: var(--font-mono); letter-spacing: 0.06em; }
+    .preview-tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .preview-group-label {
+      color: #555; font-size: 10px; font-family: var(--font-mono);
+      letter-spacing: 0.08em; margin-right: 2px;
+    }
+    .preview-chrome button {
+      font: 500 11px/1 var(--font-sans); padding: 5px 12px;
+      border: 1px solid rgba(255,255,255,0.15); background: transparent; color: #bbb; border-radius: 999px;
+    }
+    .preview-chrome button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .preview-hint { margin-left: auto; font-size: 10px; color: #555; font-family: var(--font-mono); }
+
+    .artboard {
+      display: none;
+      height: calc(100vh - var(--chrome-h));
+      height: calc(100svh - var(--chrome-h));
+      overflow: hidden;
+      position: relative;
+    }
+    .artboard.active { display: block; }
+    .artboard.scroll-artboard { overflow-y: auto; background: var(--paper); }
+
+    /* Shinya-style: one full screen per section */
+    .scroll-story {
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+    }
+
+    .panel {
+      min-height: 100%;
+      min-height: 100%;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .panel-inner {
+      width: 100%;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: clamp(72px, 10vh, 100px) clamp(20px, 4vw, 48px) clamp(40px, 6vh, 64px);
+      position: relative;
+      z-index: 2;
+    }
+
+    .section-index {
+      position: fixed;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      list-style: none;
+    }
+    .section-index a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.45;
+      transition: opacity 0.25s;
+    }
+    .section-index a:hover,
+    .section-index a.active { opacity: 1; color: var(--ink); }
+    .section-index a.active .dot { background: var(--accent); transform: scale(1.35); }
+    .section-index .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+      transition: transform 0.25s, background 0.25s;
+    }
+    .section-index.on-dark a { color: rgba(255,255,255,0.5); }
+    .section-index.on-dark a.active { color: #fff; }
+
+    .nav-fixed {
+      position: fixed;
+      top: var(--chrome-h);
+      left: 0;
+      right: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      padding: 14px clamp(20px, 4vw, 48px);
+      gap: 24px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.3s, background 0.3s;
+      pointer-events: none;
+    }
+    .nav-fixed > * { pointer-events: auto; }
+    .nav-fixed .logo { margin-right: auto; font-weight: 700; }
+    .nav-fixed a { text-decoration: none; opacity: 0.75; }
+    .nav-fixed a:hover { opacity: 1; }
+    .nav-fixed .resume {
+      padding: 7px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 1;
+    }
+    .nav-fixed.theme-dark { color: #fff; }
+    .nav-fixed.theme-dark .resume { background: var(--accent); color: #fff; }
+    .nav-fixed.theme-light {
+      color: var(--ink);
+      background: var(--nav-bar-bg);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-fixed.theme-light .resume { background: var(--accent); color: #fff; }
+
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      margin-left: 4px;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      flex-shrink: 0;
+    }
+    .theme-toggle:hover { border-color: var(--accent); }
+    .theme-toggle svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .theme-toggle .icon-sun { display: none; }
+    .theme-toggle .icon-moon { display: block; }
+    html[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+    html[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+    .panel-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .panel-dark .panel-label { color: rgba(255,255,255,0.45); }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      opacity: 0.4;
+      z-index: 5;
+    }
+    .panel-dark .scroll-hint { color: #fff; }
+    .scroll-hint.muted { color: var(--muted); }
+
+    /* Data abstract decorations */
+    .data-deco {
+      position: absolute;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.22;
+      color: var(--accent);
+    }
+    .data-deco.light { color: rgba(255,255,255,0.5); opacity: 0.35; }
+    .data-deco strong { opacity: 0.5; }
+
+    .float-num {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 500;
+      opacity: 0.06;
+      color: var(--ink);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ——— Panel 1: Hero ——— */
+    .panel-hero {
+      background: var(--hero-bg);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: stretch;
+      padding: 0;
+      justify-content: stretch;
+    }
+
+    .hero-left {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(100px, 12vh, 140px) clamp(24px, 5vw, 56px) clamp(48px, 8vh, 80px);
+      color: #fff;
+    }
+
+    .hero-right {
+      position: relative;
+      min-height: 50vh;
+    }
+
+    @media (min-width: 901px) {
+      .hero-right { min-height: 100%; }
+    }
+
+    .hero-visual-wrap {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .hero-visual-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 15%;
+    }
+
+    .hero-visual-scrim {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, var(--ink) 0%, transparent 35%, rgba(10,10,10,0.2) 100%);
+    }
+
+    .hero-charts {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .hero-charts svg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: clamp(1.85rem, 4vw, 3rem);
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin-bottom: 18px;
+    }
+
+    .role-line {
+      font-size: 15px;
+      margin-bottom: 28px;
+      min-height: 1.4em;
+      color: rgba(255,255,255,0.85);
+    }
+    .role-line .caret {
+      display: inline-block;
+      width: 2px; height: 0.85em;
+      background: var(--accent);
+      margin-left: 3px;
+      vertical-align: baseline;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      padding: 12px 22px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font: 600 13px var(--font-sans);
+    }
+    .btn-ghost {
+      padding: 12px 22px;
+      background: transparent;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 6px;
+      font: 500 13px var(--font-sans);
+    }
+
+    .panel-impact { background: var(--paper); }
+    .panel-work { background: var(--paper-cool); }
+    .panel-about { background: var(--white); }
+    .panel-contact.panel-dark { background: var(--contact-bg); color: #fff; }
+
+    .section-head h2 { color: var(--ink); }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(16px, 3vw, 32px);
+      margin-top: 24px;
+    }
+    .kpi-block { text-align: left; }
+    .kpi-block .kpi-value {
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--ink);
+    }
+    .kpi-block .kpi-value.teal { color: var(--accent); }
+    .kpi-block .kpi-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-top: 10px;
+      text-transform: uppercase;
+    }
+
+    .section-head { margin-bottom: 28px; }
+    .panel-contact .section-head h2 { color: #fff; }
+    .panel-contact p { color: rgba(255,255,255,0.6); margin-top: 12px; }
+    .panel-contact a { color: #fff; font-weight: 600; }
+
+    .cards-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .case-card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      transition: transform 0.3s;
+    }
+    .case-card:hover { transform: translateY(-5px); }
+    .case-card .thumb { height: 120px; background: var(--paper-cool); }
+    .case-card .body { padding: 18px; }
+    .case-card h3 { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .pill {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 4px 10px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      margin: 8px 0;
+    }
+    .tools { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+
+    .about-row {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 36px;
+      align-items: center;
+    }
+    .about-row img {
+      width: 100%;
+      border-radius: 10px;
+      aspect-ratio: 4/5;
+      object-fit: cover;
+    }
+
+    /* Blog — keep structure you liked */
+    .nav-light {
+      display: flex; align-items: center;
+      padding: 16px clamp(20px, 4vw, 40px);
+      background: var(--white);
+      border-bottom: 1px solid var(--line);
+      font-size: 13px; font-weight: 500; gap: 24px;
+      position: relative;
+    }
+    .nav-light .logo { font-weight: 700; margin-right: auto; }
+    .nav-light a { color: var(--ink); text-decoration: none; opacity: 0.65; }
+    .nav-light .theme-toggle { color: var(--ink); }
+
+    .nav-admin {
+      display: flex; align-items: center; flex-wrap: wrap;
+      padding: 14px clamp(20px, 4vw, 40px);
+      background: var(--white);
+      border-bottom: 1px solid var(--line);
+      font-size: 13px; font-weight: 500; gap: 16px 20px;
+      position: sticky; top: 0; z-index: 30;
+    }
+    .nav-admin .logo { font-weight: 700; margin-right: auto; color: var(--ink); }
+    .nav-admin a { color: var(--ink); text-decoration: none; opacity: 0.65; }
+    .nav-admin a:hover { opacity: 1; }
+    .nav-admin .theme-toggle { color: var(--ink); }
+    .nav-admin .nav-active { opacity: 1; font-weight: 600; color: var(--accent); }
+    .admin-badge {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .auth-shell {
+      min-height: calc(100% - 56px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px 64px;
+      position: relative;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 40px 36px 36px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.06);
+    }
+    html[data-theme="dark"] .auth-card { box-shadow: 0 24px 48px rgba(0,0,0,0.35); }
+    .auth-card h1 {
+      text-align: center;
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .auth-mark {
+      width: 52px; height: 52px;
+      background: var(--hero-bg);
+      color: #fff;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.15rem;
+      margin: 0 auto 24px;
+    }
+    .form-stack { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-field label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .form-field input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      font: 500 14px var(--font-sans);
+    }
+    .form-field input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .btn-submit {
+      width: 100%;
+      margin-top: 8px;
+      padding: 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font: 600 13px var(--font-sans);
+      letter-spacing: 0.04em;
+    }
+    .auth-foot {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .auth-foot a { color: var(--accent); font-weight: 600; text-decoration: none; }
+
+    .admin-main {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 28px clamp(20px, 4vw, 48px) 72px;
+    }
+    .admin-main h1 {
+      font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+    .admin-rule {
+      height: 2px;
+      background: var(--ink);
+      opacity: 0.12;
+      margin: 14px 0 24px;
+      border-radius: 1px;
+    }
+    .admin-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 28px;
+    }
+    .btn-submit.inline { width: auto; min-width: 160px; margin-top: 0; }
+    .btn-secondary {
+      padding: 14px 22px;
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font: 600 13px var(--font-sans);
+    }
+    .file-drop {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 16px 14px;
+      background: var(--paper);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .file-drop strong { color: var(--accent); font-weight: 600; }
+
+    .editor-mock {
+      margin-top: 20px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--card-bg);
+    }
+    .editor-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--paper-cool);
+    }
+    .editor-toolbar span {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 5px 8px;
+      border-radius: 4px;
+      color: var(--muted);
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+    }
+    .editor-body {
+      min-height: 220px;
+      padding: 20px 18px;
+      color: var(--text-body);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+    .editor-body p + p { margin-top: 12px; }
+    .editor-body .placeholder { color: var(--muted); font-style: italic; }
+
+    .panel-insights-intro { background: var(--paper); }
+    .panel-insights-featured { background: var(--white); }
+    .panel-insights-grid { background: var(--paper-cool); }
+
+    .insights-hero {
+      position: relative;
+    }
+    .insights-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .insights-hero h1 {
+      font-size: clamp(1.6rem, 3.5vw, 2.35rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      max-width: 16ch;
+      color: var(--ink);
+    }
+    .insights-hero .lede {
+      margin-top: 12px;
+      color: var(--muted);
+      max-width: 40ch;
+      line-height: 1.55;
+    }
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+    .filter-pill {
+      padding: 7px 15px; font-size: 12px; border-radius: 999px;
+      border: 1px solid var(--line); background: var(--filter-pill-bg); color: var(--muted);
+    }
+    .filter-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .blog-panel-body {
+      position: relative;
+    }
+    .featured-row {
+      display: grid;
+      grid-template-columns: 1.45fr 0.75fr;
+      gap: 22px;
+      margin-bottom: 28px;
+    }
+    .featured-main {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .featured-main .feat-img {
+      height: 200px;
+      background: linear-gradient(145deg, #4a5f73 0%, #2a3540 100%);
+      position: relative;
+    }
+    .featured-main .feat-body { padding: 22px; }
+    .featured-main h2 { font-size: 1.15rem; font-weight: 600; line-height: 1.35; color: var(--ink); }
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px;
+    }
+    .post-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .post-card {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .post-card .thumb { height: 88px; background: var(--paper-cool); }
+    .post-card .body { padding: 14px; }
+    .post-card h3 { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .post-card p { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* Post */
+    .post-page { position: relative; background: var(--paper); }
+    .post-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 200px;
+      gap: 36px;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 36px clamp(20px, 4vw, 40px) 64px;
+    }
+    .post-layout article { font-family: var(--font-serif); }
+    .post-layout .meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+    }
+    .post-layout h1 {
+      font-size: clamp(1.55rem, 3vw, 2.1rem);
+      font-weight: 600;
+      line-height: 1.25;
+      margin: 12px 0 16px;
+      color: var(--ink);
+    }
+    .post-hero-img {
+      height: 240px;
+      border-radius: 10px;
+      background: linear-gradient(145deg, #5a6d7d, #2c3640);
+      margin: 20px 0;
+    }
+    .post-layout .body p {
+      font-size: 1.05rem;
+      line-height: 1.78;
+      color: var(--text-body);
+      margin-bottom: 1.2em;
+      max-width: 62ch;
+    }
+    .gutter-chart {
+      position: sticky;
+      top: 72px;
+      padding: 14px;
+      background: var(--gutter-chart-bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .gutter-chart .label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .mini-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+      height: 72px;
+    }
+    .mini-bars span {
+      flex: 1;
+      background: var(--accent);
+      opacity: 0.4;
+      border-radius: 2px 2px 0 0;
+    }
+
+    @media (max-width: 900px) {
+      .panel-hero { grid-template-columns: 1fr; }
+      .hero-right { min-height: 42vh; order: -1; }
+      .hero-left { padding-top: 64px; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .cards-3, .featured-row, .post-grid, .about-row, .post-layout {
+        grid-template-columns: 1fr;
+      }
+      .section-index .label-text { display: none; }
+      .form-row-2 { grid-template-columns: 1fr; }
+      .preview-hint { display: none; }
+    }
+  </style>
+</head>
+<body class="preview-active on-hero">
+  <div class="cursor-dot" id="cursor-dot" hidden></div>
+  <div class="cursor-ring" id="cursor-ring" hidden></div>
+
+  <div class="preview-chrome">
+    <span>PREVIEW</span>
+    <div class="preview-tabs">
+      <button type="button" class="active" data-page="home">Home</button>
+      <button type="button" data-page="blog">Insights</button>
+      <button type="button" data-page="post">Article</button>
+    </div>
+    <div class="preview-tabs">
+      <span class="preview-group-label">AUTH</span>
+      <button type="button" data-page="signin">Sign in</button>
+      <button type="button" data-page="signup">Sign up</button>
+    </div>
+    <div class="preview-tabs">
+      <span class="preview-group-label">ADMIN</span>
+      <button type="button" data-page="new-post">New post</button>
+      <button type="button" data-page="new-project">Project</button>
+      <button type="button" data-page="new-mail">Newsletter</button>
+    </div>
+    <span class="preview-hint"><a href="DESIGN.md" style="color:#7eb8d4">DESIGN.md</a></span>
+  </div>
+
+  <!-- HOME -->
+  <div class="artboard active" id="page-home">
+    <nav class="nav-fixed theme-dark" id="home-nav" aria-label="Site">
+      <span class="logo">Emmanuel Tobiloba</span>
+      <a href="#hero" data-scroll>Intro</a>
+      <a href="#impact" data-scroll>Impact</a>
+      <a href="#work" data-scroll>Work</a>
+      <a href="#about" data-scroll>About</a>
+      <a href="#" data-goto="blog">Insights</a>
+      <a href="#contact" data-scroll>Contact</a>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" title="Night mode" data-hover>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+      <a href="#" class="resume" data-hover>Resume</a>
+    </nav>
+
+    <ul class="section-index on-dark" id="home-dots" aria-label="Sections">
+      <li><a href="#hero" data-scroll class="active"><span class="dot"></span><span class="label-text">Intro</span></a></li>
+      <li><a href="#impact" data-scroll><span class="dot"></span><span class="label-text">Impact</span></a></li>
+      <li><a href="#work" data-scroll><span class="dot"></span><span class="label-text">Work</span></a></li>
+      <li><a href="#about" data-scroll><span class="dot"></span><span class="label-text">About</span></a></li>
+      <li><a href="#contact" data-scroll><span class="dot"></span><span class="label-text">Contact</span></a></li>
+    </ul>
+
+    <div class="scroll-story" id="home-scroll">
+      <section class="panel panel-hero panel-dark" id="hero" data-section data-theme="dark">
+        <div class="data-deco light" style="left:4%;top:22%;width:100px" aria-hidden="true">
+          <svg viewBox="0 0 100 80"><rect x="8" y="40" width="10" height="32" fill="currentColor"/><rect x="26" y="24" width="10" height="48" fill="currentColor"/><rect x="44" y="32" width="10" height="40" fill="currentColor"/><rect x="62" y="12" width="10" height="60" fill="currentColor"/></svg>
+        </div>
+        <span class="float-num light" style="right:10%;top:20%;color:#fff;opacity:0.07">98%</span>
+
+        <div class="hero-left">
+          <p class="eyebrow">DATA · DELIVERY · OPERATIONS</p>
+          <h1 class="hero-title">Turning complexity into clear decisions.</h1>
+          <p class="role-line"><span id="type-text">I am Emmanuel Tobiloba</span><span class="caret"></span></p>
+          <div class="btn-row">
+            <button class="btn-primary" type="button" data-hover data-scroll-target="#work">View work</button>
+            <button class="btn-ghost" type="button" data-hover data-goto="blog">Insights</button>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="hero-visual-wrap">
+            <img src="assets/GMAN.png" alt="Emmanuel Tobiloba" />
+            <div class="hero-visual-scrim"></div>
+          </div>
+          <div class="hero-charts" aria-hidden="true">
+            <svg viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient id="chartGlow" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stop-color="#3d6b8c" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#3d6b8c" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <polyline fill="none" stroke="#7eb8d4" stroke-width="2.5" opacity="0.85"
+                points="40,520 120,460 200,480 280,380 360,400 440,300 520,340 580,260" />
+              <path d="M40,520 L40,680 L580,680 L580,260 L520,340 L440,300 L360,400 L280,380 L200,480 L120,460 L40,520 Z" fill="url(#chartGlow)" opacity="0.35"/>
+              <g opacity="0.5" fill="#7eb8d4">
+                <rect x="48" y="600" width="14" height="80" rx="2"/>
+                <rect x="80" y="560" width="14" height="120" rx="2"/>
+                <rect x="112" y="580" width="14" height="100" rx="2"/>
+                <rect x="144" y="520" width="14" height="160" rx="2"/>
+              </g>
+              <text x="400" y="200" fill="#7eb8d4" font-family="monospace" font-size="28" opacity="0.35">27%</text>
+            </svg>
+          </div>
+        </div>
+        <span class="scroll-hint">SCROLL</span>
+      </section>
+
+      <section class="panel panel-impact" id="impact" data-section data-theme="light">
+        <div class="panel-inner">
+          <p class="panel-label">01 — IMPACT</p>
+          <div class="section-head"><h2>Outcomes at a glance</h2></div>
+          <div class="kpi-grid">
+            <div class="kpi-block"><div class="kpi-value teal">$700K</div><div class="kpi-label">Cost impact</div></div>
+            <div class="kpi-block"><div class="kpi-value">98%</div><div class="kpi-label">On-time</div></div>
+            <div class="kpi-block"><div class="kpi-value">100%</div><div class="kpi-label">SLA</div></div>
+            <div class="kpi-block"><div class="kpi-value">40</div><div class="kpi-label">Team scale</div></div>
+          </div>
+        </div>
+        <span class="float-num" style="right:8%;bottom:15%">Σ</span>
+      </section>
+
+      <section class="panel panel-work" id="work" data-section data-theme="light">
+        <div class="panel-inner">
+          <p class="panel-label">02 — WORK</p>
+          <div class="data-deco" style="left:2%;top:20%;width:80px" aria-hidden="true">
+            <svg viewBox="0 0 80 100"><rect x="10" y="55" width="8" height="35" fill="currentColor"/><rect x="28" y="35" width="8" height="55" fill="currentColor"/><rect x="46" y="45" width="8" height="45" fill="currentColor"/></svg>
+          </div>
+          <div class="section-head"><h2>Selected work</h2></div>
+          <div class="cards-3">
+            <article class="case-card" data-hover>
+              <div class="thumb"></div>
+              <div class="body">
+                <span class="pill">−22% cycle time</span>
+                <h3>Supply chain optimization</h3>
+                <p class="tools">SQL · Python · Tableau</p>
+              </div>
+            </article>
+            <article class="case-card" data-hover>
+              <div class="thumb"></div>
+              <div class="body">
+                <span class="pill">340 hrs saved</span>
+                <h3>Escalation analytics</h3>
+                <p class="tools">Power BI · Excel</p>
+              </div>
+            </article>
+            <article class="case-card" data-hover>
+              <div class="thumb"></div>
+              <div class="body">
+                <span class="pill">+35% visibility</span>
+                <h3>Logistics program</h3>
+                <p class="tools">Python · Looker</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel panel-about" id="about" data-section data-theme="light">
+        <div class="panel-inner">
+          <p class="panel-label">03 — ABOUT</p>
+          <div class="about-row">
+            <img src="assets/about-hero.jpg" alt="About Emmanuel" data-hover />
+            <div>
+              <div class="section-head"><h2>About me</h2></div>
+              <p style="color:var(--muted);line-height:1.75;max-width:48ch">Data analyst, project manager, and operations lead. I turn analysis into delivery—and delivery into measurable results.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel panel-contact panel-dark" id="contact" data-section data-theme="dark">
+        <div class="panel-inner" style="text-align:center">
+          <p class="panel-label">04 — CONTACT</p>
+          <div class="section-head"><h2>Let’s work together</h2></div>
+          <p><a href="mailto:emmanueltobilola@gmail.com" data-hover>emmanueltobilola@gmail.com</a></p>
+          <p style="margin-top:20px;font-family:var(--font-mono);font-size:11px">© Emmanuel Tobiloba</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="artboard" id="page-blog">
+    <nav class="nav-fixed theme-light" id="blog-nav">
+      <span class="logo">Emmanuel Tobiloba</span>
+      <a href="#" data-goto="home">Home</a>
+      <a href="#blog-intro" data-scroll-blog>Insights</a>
+      <a href="#blog-grid" data-scroll-blog>Posts</a>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" title="Night mode" data-hover>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </nav>
+
+    <ul class="section-index" id="blog-dots" aria-label="Insight sections">
+      <li><a href="#blog-intro" data-scroll-blog class="active"><span class="dot"></span><span class="label-text">Intro</span></a></li>
+      <li><a href="#blog-featured" data-scroll-blog><span class="dot"></span><span class="label-text">Featured</span></a></li>
+      <li><a href="#blog-grid" data-scroll-blog><span class="dot"></span><span class="label-text">All posts</span></a></li>
+    </ul>
+
+    <div class="scroll-story" id="blog-scroll">
+      <section class="panel panel-insights-intro" id="blog-intro" data-section-blog>
+        <div class="panel-inner insights-hero">
+          <span class="float-num" style="left:5%;top:25%">01</span>
+          <p class="insights-label">INSIGHTS</p>
+          <h1>Analysis, delivery notes & ops playbooks</h1>
+          <p class="lede">Writing on data, projects, and operations.</p>
+          <div class="filters">
+            <span class="filter-pill active">All</span>
+            <span class="filter-pill">Data</span>
+            <span class="filter-pill">PM</span>
+            <span class="filter-pill">Operations</span>
+          </div>
+        </div>
+        <span class="scroll-hint muted">SCROLL</span>
+      </section>
+
+      <section class="panel panel-insights-featured" id="blog-featured" data-section-blog>
+        <div class="panel-inner blog-panel-body">
+          <p class="panel-label">FEATURED</p>
+          <div class="featured-row">
+            <article class="featured-main">
+              <div class="feat-img"></div>
+              <div class="feat-body">
+                <span class="pill">Data</span>
+                <h2>Building a SLA dashboard executives actually use</h2>
+                <p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:10px">Mar 2026 · 1.2k views</p>
+              </div>
+            </article>
+            <div class="side-panel">
+              <h3 style="font-size:13px;font-weight:600;margin-bottom:14px">Trending</h3>
+              <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Recent post title</p>
+              <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Recent post title</p>
+              <p style="font-size:12px;color:var(--muted)">Recent post title</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel panel-insights-grid" id="blog-grid" data-section-blog>
+        <div class="panel-inner blog-panel-body">
+          <p class="panel-label">ALL POSTS</p>
+          <div class="data-deco" style="right:0;top:10%;width:70px" aria-hidden="true">
+            <svg viewBox="0 0 70 70"><rect x="5" y="5" width="60" height="60" fill="none" stroke="currentColor" stroke-width="0.8"/></svg>
+          </div>
+          <div class="post-grid">
+            <article class="post-card" data-hover><div class="thumb"></div><div class="body"><h3>Post title</h3><p>Excerpt</p></div></article>
+            <article class="post-card" data-hover><div class="thumb"></div><div class="body"><h3>Post title</h3><p>Excerpt</p></div></article>
+            <article class="post-card" data-hover><div class="thumb"></div><div class="body"><h3>Post title</h3><p>Excerpt</p></div></article>
+            <article class="post-card" data-hover><div class="thumb"></div><div class="body"><h3>Post title</h3><p>Excerpt</p></div></article>
+            <article class="post-card" data-hover><div class="thumb"></div><div class="body"><h3>Post title</h3><p>Excerpt</p></div></article>
+            <article class="post-card" data-hover><div class="thumb"></div><div class="body"><h3>Post title</h3><p>Excerpt</p></div></article>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- SIGN IN -->
+  <div class="artboard scroll-artboard" id="page-signin">
+    <nav class="nav-admin">
+      <span class="logo">Emmanuel Tobiloba</span>
+      <a href="#" data-goto="blog">Insights</a>
+      <a href="#" data-goto="home">Home</a>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" title="Night mode" data-hover>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </nav>
+    <div class="auth-shell">
+      <div class="data-deco" style="left:6%;top:18%;width:80px;opacity:0.12" aria-hidden="true">
+        <svg viewBox="0 0 80 60"><polyline fill="none" stroke="currentColor" stroke-width="1.2" points="0,50 20,35 40,42 60,18 80,28"/></svg>
+      </div>
+      <form class="auth-card" action="#" onsubmit="return false">
+        <div class="auth-mark">ET</div>
+        <h1>Welcome back</h1>
+        <p style="text-align:center;color:var(--muted);font-size:14px">Sign in to manage Insights and projects.</p>
+        <div class="form-stack">
+          <div class="form-field">
+            <label for="signin-user">Username</label>
+            <input id="signin-user" type="text" placeholder="Username" autocomplete="username" />
+          </div>
+          <div class="form-field">
+            <label for="signin-pass">Password</label>
+            <input id="signin-pass" type="password" placeholder="Password" autocomplete="current-password" />
+          </div>
+          <button type="submit" class="btn-submit" data-hover>Log in</button>
+        </div>
+        <p class="auth-foot">No account? <a href="#" data-goto="signup">Sign up</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- SIGN UP -->
+  <div class="artboard scroll-artboard" id="page-signup">
+    <nav class="nav-admin">
+      <span class="logo">Emmanuel Tobiloba</span>
+      <a href="#" data-goto="signin">Sign in</a>
+      <a href="#" data-goto="blog">Insights</a>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" title="Night mode" data-hover>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </nav>
+    <div class="auth-shell">
+      <form class="auth-card" action="#" onsubmit="return false" style="max-width:480px">
+        <div class="auth-mark">ET</div>
+        <h1>Create account</h1>
+        <div class="form-stack">
+          <div class="form-row-2">
+            <div class="form-field">
+              <label for="signup-first">First name</label>
+              <input id="signup-first" type="text" placeholder="First name" />
+            </div>
+            <div class="form-field">
+              <label for="signup-last">Last name</label>
+              <input id="signup-last" type="text" placeholder="Last name" />
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="signup-user">Username</label>
+            <input id="signup-user" type="text" placeholder="Username" autocomplete="username" />
+          </div>
+          <div class="form-field">
+            <label for="signup-email">Email</label>
+            <input id="signup-email" type="email" placeholder="you@example.com" autocomplete="email" />
+          </div>
+          <div class="form-field">
+            <label for="signup-pass">Password</label>
+            <input id="signup-pass" type="password" placeholder="Password" autocomplete="new-password" />
+          </div>
+          <div class="form-field">
+            <label for="signup-pass2">Confirm password</label>
+            <input id="signup-pass2" type="password" placeholder="Confirm password" autocomplete="new-password" />
+          </div>
+          <button type="submit" class="btn-submit" data-hover>Create account</button>
+        </div>
+        <p class="auth-foot">Already have an account? <a href="#" data-goto="signin">Sign in</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- NEW POST -->
+  <div class="artboard scroll-artboard" id="page-new-post">
+    <nav class="nav-admin">
+      <span class="logo">Emmanuel Tobiloba</span>
+      <span class="admin-badge">ADMIN</span>
+      <a href="#" data-goto="blog">Insights</a>
+      <a href="#" class="nav-active" data-goto="new-post">New post</a>
+      <a href="#" data-goto="new-project">Project</a>
+      <a href="#" data-goto="new-mail">Newsletter</a>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" title="Night mode" data-hover>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </nav>
+    <main class="admin-main">
+      <h1>Create new post</h1>
+      <div class="admin-rule"></div>
+      <div class="form-field">
+        <label for="post-title">Title</label>
+        <input id="post-title" type="text" placeholder="Article title" value="How we cut disposition time 27% without adding headcount" />
+      </div>
+      <div class="form-field" style="margin-top:16px">
+        <label>Backdrop image</label>
+        <div class="file-drop" data-hover>Choose file or <strong>browse</strong> — JPG, PNG</div>
+      </div>
+      <div class="editor-mock">
+        <div class="editor-toolbar" aria-hidden="true">
+          <span>Undo</span><span>Bold</span><span>Italic</span><span>H2</span><span>List</span><span>Link</span><span>Image</span><span>Table</span><span>Code</span><span>Preview</span>
+        </div>
+        <div class="editor-body">
+          <p>Operations teams often drown in escalations that repeat the same root causes.</p>
+          <p class="placeholder">Write your article body here…</p>
+        </div>
+      </div>
+      <div class="admin-actions">
+        <button type="button" class="btn-submit inline" data-hover>Create post</button>
+        <button type="button" class="btn-secondary" data-hover data-goto="blog">Cancel</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- NEW PROJECT -->
+  <div class="artboard scroll-artboard" id="page-new-project">
+    <nav class="nav-admin">
+      <span class="logo">Emmanuel Tobiloba</span>
+      <span class="admin-badge">ADMIN</span>
+      <a href="#" data-goto="blog">Insights</a>
+      <a href="#" data-goto="new-post">New post</a>
+      <a href="#" class="nav-active" data-goto="new-project">Project</a>
+      <a href="#" data-goto="new-mail">Newsletter</a>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" title="Night mode" data-hover>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </nav>
+    <main class="admin-main">
+      <h1>Add portfolio project</h1>
+      <div class="admin-rule"></div>
+      <div class="form-stack" style="margin-top:0">
+        <div class="form-field">
+          <label for="proj-title">Title</label>
+          <input id="proj-title" type="text" placeholder="Project title" value="Supply chain visibility dashboard" />
+        </div>
+        <div class="form-field">
+          <label for="proj-link">Link</label>
+          <input id="proj-link" type="url" placeholder="https://…" value="https://example.com/case-study" />
+        </div>
+        <div class="form-field">
+          <label>Thumbnail / backdrop</label>
+          <div class="file-drop" data-hover>Choose file or <strong>browse</strong></div>
+        </div>
+      </div>
+      <div class="admin-actions">
+        <button type="button" class="btn-submit inline" data-hover>Create project</button>
+        <button type="button" class="btn-secondary" data-hover data-goto="home">Cancel</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- NEWSLETTER -->
+  <div class="artboard scroll-artboard" id="page-new-mail">
+    <nav class="nav-admin">
+      <span class="logo">Emmanuel Tobiloba</span>
+      <span class="admin-badge">ADMIN</span>
+      <a href="#" data-goto="blog">Insights</a>
+      <a href="#" data-goto="new-post">New post</a>
+      <a href="#" data-goto="new-project">Project</a>
+      <a href="#" class="nav-active" data-goto="new-mail">Newsletter</a>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" title="Night mode" data-hover>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </nav>
+    <main class="admin-main">
+      <h1>Send newsletter</h1>
+      <div class="admin-rule"></div>
+      <div class="form-field">
+        <label for="mail-subject">Subject</label>
+        <input id="mail-subject" type="text" placeholder="Email subject" value="New on Insights: operations metrics that matter" />
+      </div>
+      <div class="editor-mock" style="margin-top:20px">
+        <div class="editor-toolbar" aria-hidden="true">
+          <span>Bold</span><span>Link</span><span>List</span><span>Preview</span>
+        </div>
+        <div class="editor-body">
+          <p>Hi —</p>
+          <p class="placeholder">Compose your mailing list message…</p>
+        </div>
+      </div>
+      <div class="admin-actions">
+        <button type="button" class="btn-submit inline" data-hover>Send to list</button>
+        <button type="button" class="btn-secondary" data-hover>Save draft</button>
+      </div>
+      <p style="margin-top:20px;font-family:var(--font-mono);font-size:11px;color:var(--muted)">PREVIEW · maps to Django mailing list + broadcast</p>
+    </main>
+  </div>
+
+  <!-- ARTICLE -->
+  <div class="artboard scroll-artboard" id="page-post">
+    <div class="data-deco" style="left:3%;top:180px;width:70px;opacity:0.15" aria-hidden="true">
+      <svg viewBox="0 0 70 70"><rect x="5" y="5" width="60" height="60" fill="none" stroke="currentColor" stroke-width="0.8"/><line x1="5" y1="23" x2="65" y2="23" stroke="currentColor" stroke-width="0.5"/><line x1="5" y1="41" x2="65" y2="41" stroke="currentColor" stroke-width="0.5"/></svg>
+    </div>
+
+    <nav class="nav-light">
+      <span class="logo">Emmanuel Tobiloba</span>
+      <a href="#" data-goto="blog">← Insights</a>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" title="Night mode" data-hover>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </nav>
+    <div class="post-layout">
+      <article>
+        <p class="meta">INSIGHTS · 8 MIN READ</p>
+        <h1>How we cut disposition time 27% without adding headcount</h1>
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--muted)">Emmanuel Tobiloba · 2,431 views</p>
+        <div class="post-hero-img"></div>
+        <div class="body">
+          <p>Operations teams often drown in escalations that repeat the same root causes. We mapped paths, tagged themes, and built a dashboard leadership opened weekly.</p>
+          <p>The result: fewer manual hours and clearer ownership—not more slide decks.</p>
+        </div>
+      </article>
+      <aside class="gutter-chart">
+        <div class="label">GHOST METRIC</div>
+        <div class="mini-bars">
+          <span style="height:55%"></span>
+          <span style="height:38%"></span>
+          <span style="height:72%"></span>
+          <span style="height:45%"></span>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const THEME_KEY = "et-preview-theme";
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem(THEME_KEY, theme);
+      document.querySelectorAll("[data-theme-toggle]").forEach((btn) => {
+        const isLight = theme === "light";
+        btn.setAttribute("aria-label", isLight ? "Switch to dark mode" : "Switch to light mode");
+        btn.setAttribute("title", isLight ? "Night mode" : "Day mode");
+      });
+    }
+
+    function initTheme() {
+      const stored = localStorage.getItem(THEME_KEY);
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(stored || (prefersDark ? "dark" : "light"));
+    }
+
+    document.querySelectorAll("[data-theme-toggle]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const current = document.documentElement.getAttribute("data-theme");
+        applyTheme(current === "light" ? "dark" : "light");
+      });
+    });
+    initTheme();
+
+    const sequences = ["I am Emmanuel Tobiloba", "I am a Data Analyst", "I lead projects & operations"];
+    let seqIndex = 0, charIndex = 0, deleting = false;
+    const typeEl = document.getElementById("type-text");
+
+    function typeTick() {
+      if (!typeEl) return;
+      const current = sequences[seqIndex];
+      if (!deleting) {
+        typeEl.textContent = current.slice(0, ++charIndex);
+        if (charIndex === current.length) { deleting = true; setTimeout(typeTick, 2000); return; }
+      } else {
+        typeEl.textContent = current.slice(0, --charIndex);
+        if (charIndex === 0) { deleting = false; seqIndex = (seqIndex + 1) % sequences.length; }
+      }
+      setTimeout(typeTick, deleting ? 35 : 80);
+    }
+    typeTick();
+
+    const dot = document.getElementById("cursor-dot");
+    const ring = document.getElementById("cursor-ring");
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    function cursorLoop() {
+      rx += (mx - rx) * 0.18;
+      ry += (my - ry) * 0.18;
+      dot.style.left = mx + "px";
+      dot.style.top = my + "px";
+      ring.style.left = rx + "px";
+      ring.style.top = ry + "px";
+      requestAnimationFrame(cursorLoop);
+    }
+    document.addEventListener("mousemove", (e) => {
+      if (e.target.closest(".preview-chrome")) return;
+      mx = e.clientX; my = e.clientY;
+      dot.hidden = false; ring.hidden = false;
+      const hero = document.getElementById("hero");
+      const onHero =
+        hero &&
+        document.getElementById("page-home").classList.contains("active") &&
+        hero.getBoundingClientRect().top <= e.clientY &&
+        e.clientY <= hero.getBoundingClientRect().bottom;
+      document.body.classList.toggle("on-hero", onHero);
+    });
+
+    function setupScrollStory(scrollEl, dotsEl, navEl, sectionAttr) {
+      if (!scrollEl) return;
+      const sections = scrollEl.querySelectorAll(`[${sectionAttr}]`);
+      const dots = dotsEl ? dotsEl.querySelectorAll("a") : [];
+
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting || entry.intersectionRatio < 0.45) return;
+            const id = entry.target.id;
+            dots.forEach((d) => d.classList.toggle("active", d.getAttribute("href") === `#${id}`));
+            if (navEl && sectionAttr === "data-section") {
+              const theme = entry.target.dataset.theme;
+              navEl.classList.toggle("theme-dark", theme === "dark");
+              navEl.classList.toggle("theme-light", theme === "light");
+              if (dotsEl) {
+                dotsEl.classList.toggle("on-dark", theme === "dark");
+              }
+            }
+            if (sectionAttr === "data-section" && id === "hero") {
+              document.body.classList.add("on-hero");
+            } else if (sectionAttr === "data-section" && document.getElementById("page-home").classList.contains("active")) {
+              document.body.classList.remove("on-hero");
+            }
+          });
+        },
+        { root: scrollEl, threshold: [0.45, 0.55] }
+      );
+      sections.forEach((s) => obs.observe(s));
+    }
+
+    setupScrollStory(
+      document.getElementById("home-scroll"),
+      document.getElementById("home-dots"),
+      document.getElementById("home-nav"),
+      "data-section"
+    );
+    setupScrollStory(
+      document.getElementById("blog-scroll"),
+      document.getElementById("blog-dots"),
+      null,
+      "data-section-blog"
+    );
+
+    function scrollToPanel(selector, scrollRoot) {
+      const el = scrollRoot.querySelector(selector);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    document.querySelectorAll("[data-scroll]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        const hash = el.getAttribute("href");
+        if (!hash || !hash.startsWith("#")) return;
+        if (!document.getElementById("page-home").classList.contains("active")) return;
+        e.preventDefault();
+        scrollToPanel(hash, document.getElementById("home-scroll"));
+      });
+    });
+
+    document.querySelectorAll("[data-scroll-blog]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        const hash = el.getAttribute("href");
+        if (!hash || !hash.startsWith("#")) return;
+        e.preventDefault();
+        scrollToPanel(hash, document.getElementById("blog-scroll"));
+      });
+    });
+
+    document.querySelectorAll("[data-scroll-target]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const sel = el.getAttribute("data-scroll-target");
+        scrollToPanel(sel, document.getElementById("home-scroll"));
+      });
+    });
+    document.querySelectorAll("[data-hover]").forEach((el) => {
+      el.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
+      el.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
+    });
+    cursorLoop();
+
+    function showPage(page) {
+      document.querySelectorAll(".preview-chrome button[data-page]").forEach((b) => {
+        b.classList.toggle("active", b.dataset.page === page);
+      });
+      document.querySelectorAll(".artboard").forEach((a) => a.classList.remove("active"));
+      const board = document.getElementById("page-" + page);
+      if (board) board.classList.add("active");
+      document.getElementById("home-dots").style.display = page === "home" ? "" : "none";
+      document.getElementById("home-nav").style.display = page === "home" ? "" : "none";
+      document.getElementById("blog-dots").style.display = page === "blog" ? "" : "none";
+      document.getElementById("blog-nav").style.display = page === "blog" ? "" : "none";
+      document.body.classList.toggle("on-hero", page === "home");
+    }
+
+    document.querySelectorAll(".preview-chrome button[data-page]").forEach((btn) => {
+      btn.addEventListener("click", () => showPage(btn.dataset.page));
+    });
+
+    showPage("home");
+
+    document.querySelectorAll("[data-goto]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        showPage(el.getAttribute("data-goto"));
+      });
+    });
+  </script>
+</body>
+</html>
