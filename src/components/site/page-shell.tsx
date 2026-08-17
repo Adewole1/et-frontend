@@ -30,7 +30,7 @@ export default function PageShell({
   return (
     <div className={dark ? "theme-dark" : "theme-light"}>
       <div
-        className={`relative isolate min-h-screen overflow-hidden bg-(--paper) font-sans text-(--ink) transition-colors duration-300 ${className}`}
+        className={`relative isolate min-h-screen overflow-x-hidden overflow-hidden bg-(--paper) font-sans text-(--ink) transition-colors duration-300 ${className}`}
       >
         <CustomCursor />
         <Header

@@ -43,7 +43,7 @@ export default function Portfolio() {
 
   return (
     <div className={dark ? "theme-dark" : "theme-light"}>
-      <div className="min-h-screen bg-(--paper) font-sans text-(--ink) transition-colors duration-300">
+      <div className="min-h-screen bg-(--paper) font-sans text-(--ink) transition-colors duration-300 w-full overflow-x-hidden">
         <CustomCursor />
         <Header
           dark={dark}
